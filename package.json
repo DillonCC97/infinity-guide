@@ -1,0 +1,33 @@
+{
+  "name": "infinity-guide",
+  "version": "1.0.0",
+  "description": "A guide to Infinity Hall and the surrounding area.",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DillonCC97/infinity-guide.git"
+  },
+  "keywords": [
+    "UF",
+    "Gainesville",
+    "Infinity",
+    "Hall",
+    "Guide"
+  ],
+  "author": "Dillon Culp",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DillonCC97/infinity-guide/issues"
+  },
+  "homepage": "https://github.com/DillonCC97/infinity-guide#readme",
+  "dependencies": {
+    "body-parser": "^1.18.1",
+    "ejs": "^2.5.7",
+    "express": "^4.15.4",
+    "method-override": "^2.3.9",
+    "mongoose": "^4.11.12"
+  }
+}
