@@ -1,0 +1,15 @@
+<% include partials/header.ejs %>
+<title>Point of Interest - <%= business.name %></title>
+</head>
+<body>
+    <% include partials/navbar.ejs %>
+    <div id="business" class="container">
+        <img src="<%= business.image %>">
+        <h1><%= business.name %></h1>
+        <h3><%= business.address %></h3>
+        <p>Phone: <%= business.phone %></p>
+        <p>Hours: <%= business.hours %></p>
+        <p><%= business.description %></p>
+    </div>
+</body>
+</html>

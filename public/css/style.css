@@ -1,0 +1,66 @@
+#results-container {
+    background: #d3d3d3;
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 100vh;
+}
+
+#results-container>div {
+    width: 350px;
+    height: 394px;
+    background: white;
+    border-radius: 5px;
+    margin: 20px;
+    -webkit-box-shadow: 2px 2px 15px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 2px 2px 15px 0px rgba(0,0,0,0.75);
+    box-shadow: 2px 2px 15px 0px rgba(0,0,0,0.75);
+}
+
+#results-container>div>div.image {
+    width: 100%;
+    height: 45%;
+    border-radius: 5px 5px 0 0;
+}
+
+#results-container>div>div:last-of-type {
+    padding: 10px;
+}
+
+#results-container h1 {
+    font-size: 35px;
+    height: 38px;
+}
+
+#results-container h2 {
+    font-size: 15px;
+    height: 16px;
+}
+
+#results-container p {
+    height: 70px;
+    overflow: hidden;
+}
+
+body {
+    background: #d3d3d3;
+}
+
+.container {
+    padding-top: 20px;
+}
+
+div.container#business img {
+    float: right;
+    margin-left: 10px;
+    max-width: 50%;
+}
+
+div#search-container {
+    width: 500px;
+    margin: 20px auto;
+}
+
+#search-container input {
+    display: inline;
+    width: auto;
+}

@@ -1,7 +1,35 @@
 <% include partials/header.ejs %>
-
+<title>Nearby Points of Interest</title>
 </head>
 <body>
      <% include partials/navbar.ejs %>
+    <div id="search-container">
+        <form action="/nearby" method="POST">
+            Search:
+            <input type="text" class="form-control" name="searchString">
+             by 
+            <select name="searchType" class="custom-select">
+                <option value="name" selected>Name</option>
+                <option value="address">Address</option>
+                <option value="description">Description</option>
+            </select>
+            <input class="btn btn-default" type="submit">
+        </form>
+    </div>
+    <div id="results-container">
+        <% businesses.forEach(function(business) { %>
+        <div id="<%= business._id %>">
+            <div class="image" style="background: url(<%= business.image %>); background-size: 100% auto; background-repeat: no-repeat"></div>
+            <div>
+                <h1 class="name"><%= business.name %></h1>
+                <h2 class="address"><%= business.address %></h2>
+                <p class="description"><%= business.description %></p>
+                <button onclick="location.href = '/nearby/<%= business._id %>'" class="btn btn-primary btn-block">
+                    Details
+                </button>
+            </div>
+        </div>
+        <% }); %>
+    </div>
 </body>
 </html>
