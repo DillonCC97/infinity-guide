@@ -22,22 +22,24 @@
     border-radius: 5px 5px 0 0;
 }
 
-#results-container>div>div:last-of-type {
+#results-container>div>div:nth-of-type(2) {
     padding: 10px;
+    height: 170px;
+}
+
+#results-container>div>div:nth-of-type(3) {
+    padding: 0 10px 0 10px;;
 }
 
 #results-container h1 {
     font-size: 35px;
-    height: 38px;
 }
 
 #results-container h2 {
     font-size: 15px;
-    height: 16px;
 }
 
 #results-container p {
-    height: 70px;
     overflow: hidden;
 }
 
