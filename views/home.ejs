@@ -3,6 +3,30 @@
 </head>
 <body>
      <% include partials/navbar.ejs %>
-    
+    <div id="home">
+        <div class="jumbotron jumbotron-fluid">
+            <h1 class="display-3">Infinity Hall</h1>
+            <a class="btn btn-primary btn-lg" href="/info" role="button">Learn more</a>
+            </p>
+        </div>
+        <div class="text-container row">
+            <div class="col-md-6">
+                <h3>Information</h3>
+                <ul>
+                    <li><b>Address:</b> 32612, 978 SW 2nd Ave, Gainesville, FL 32601</li>
+                    <li><b>Phone:</b> (352) 392-9675</li>
+                    <li><b>Bus Route Access:</b>1, 25, 46</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h3>Nearby Locations</h3>
+                <ul>
+                    <% businesses.forEach(function(business) { %>
+                        <li><%= business.name %></li>
+                    <% }); %>
+                </ul>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
