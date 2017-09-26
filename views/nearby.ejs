@@ -19,7 +19,28 @@
     <div id="results-container">
         <% businesses.forEach(function(business) { %>
         <div id="<%= business._id %>">
-            <div class="image" style="background: url(<%= business.image %>); background-size: 100% auto; background-repeat: no-repeat"></div>
+            <div class="image" style="background: url(<%= business.image %>); background-size: 100% auto; background-repeat: no-repeat">
+                <div class="rating">
+                <% if (business.rating.length == 0) { %>
+                <p>No Ratings</p>
+                <% } else { %>
+                <% var totalRating = 0; %>
+                <% business.rating.forEach(function(rating) { %>
+                <% totalRating += parseInt(rating); %>
+                <% }); %>
+                <%for(var i = 0; i < (totalRating / business.rating.length) - ((totalRating / business.rating.length) % 1); i++) {  %>
+                <i class="fa fa-star" aria-hidden="true"></i>
+                <% } %>
+                <% if ((totalRating / business.rating.length) % 1 > 0.25 && (totalRating / business.rating.length) % 1 < 0.75) { %>
+                <i class="fa fa-star-half-o" aria-hidden="true"></i>
+                <% } else if ((totalRating / business.rating.length) % 1 > 0.75) { %>
+                            <i class="fa fa-star" aria-hidden="true"></i>
+                <% } %>
+                <%= (totalRating / business.rating.length).toFixed(2) %>
+                <% } %>
+                </div>
+                
+            </div>
             <div>
                 <h1 class="name"><%= business.name %></h1>
                 <h2 class="address"><%= business.address %></h2>

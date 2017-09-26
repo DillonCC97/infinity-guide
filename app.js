@@ -17,7 +17,9 @@ var passport = require('passport'),
 var passportLocalMongoose = require('passport-local-mongoose');
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(session({ secret: 'infinityhall' }));
+app.use(session({
+    secret: 'infinityhall'
+}));
 passport.use(new LocalStrategy(function(username, password, done) {
     User.findOne({
         username: username
@@ -170,7 +172,9 @@ app.get("/nearby", function(req, res) {
 app.get("/nearby/new", function(req, res) {
     console.log("new business page requested");
     console.log(req.user);
-    res.render("new.ejs", {user: req.user});
+    res.render("new.ejs", {
+        user: req.user
+    });
 });
 app.post("/nearby/new", function(req, res) {
     var newBusiness = new Business({
@@ -205,7 +209,54 @@ app.get("/nearby/:business_id", function(req, res) {
             });
         }
     });
-})
+});
+app.post("/:business_id/newtip", function(req, res) {
+    Business.update({
+        _id: req.params.business_id
+    }, {
+        $push: {
+            tips: {
+                tipText: req.body.tip,
+                tipRating: 0
+            }
+        }
+    }, function(err, data) {
+        if(err) {
+            console.log(err);
+        } else {
+            res.redirect("/nearby/" + req.params.business_id);
+        }
+    });
+});
+app.post("/:business_id/newrating", function(req, res) {
+    if(req.body.rating > 0 && req.body.rating < 6 && req.body.rating % 1 === 0) {
+        Business.update({
+            _id: req.params.business_id
+        }, {
+            $push: {
+                rating: req.body.rating
+            }
+        }, function(err, data) {
+            if(err) {
+                console.log(err);
+            } else {
+                res.redirect("/nearby/" + req.params.business_id);
+            }
+        });
+    }
+});
+app.post("/:business_id/:tip_index/thumbup", function(req, res) {
+    
+});
+Business.findByIdAndUpdate("59c2efdeec53070c784cc8ea", {
+    tips: []
+}, function(err, data) {
+    if(err) {
+        console.log(err)
+    } else {
+        console.log(data);
+    }
+});
 app.listen(port, function() {
     console.log("Listening on port " + port);
 });

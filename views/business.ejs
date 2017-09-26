@@ -3,13 +3,86 @@
 </head>
 <body>
     <% include partials/navbar.ejs %>
-    <div id="business" class="container">
+    <div id="business" class="container text-container">
         <img src="<%= business.image %>">
         <h1><%= business.name %></h1>
         <h3><%= business.address %></h3>
+        
+        <form method="post" action="/<%= business._id %>/newrating">
+            <% if (business.rating.length == 0) { %>
+        No Ratings
+        <% } else { %>
+        <% var totalRating = 0; %>
+        <% business.rating.forEach(function(rating) { %>
+        <% totalRating += parseInt(rating); %>
+        <% }); %>
+        <%for(var i = 0; i < (totalRating / business.rating.length) - ((totalRating / business.rating.length) % 1); i++) {  %>
+            <i class="fa fa-star" aria-hidden="true"></i>
+            <% } %>
+            <% if ((totalRating / business.rating.length) % 1 > 0.25 && (totalRating / business.rating.length) % 1 < 0.75) { %>
+            <i class="fa fa-star-half-o" aria-hidden="true"></i>
+            <% } else if ((totalRating / business.rating.length) % 1 > 0.75) { %>
+                        <i class="fa fa-star" aria-hidden="true"></i>
+            <% } %>
+                                    <%= (totalRating / business.rating.length).toFixed(2) %>
+        <% } %>
+            <br>
+            <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="rating" value="1"> 1
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="rating" value="2"> 2
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="rating" value="3"> 3
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="rating" value="4"> 4
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="rating" value="5"> 5
+                </label>
+            </div>
+            <input type="submit">
+        </form>
         <p>Phone: <%= business.phone %></p>
         <p>Hours: <%= business.hours %></p>
         <p><%= business.description %></p>
+    </div>
+    <div class="container row">
+        <div class="col-md-6">
+            <div class="text-container">
+                <form id="new-tip" method="post" action="/<%= business._id %>/newtip">
+                    <input type="text" name="tip">
+                    <input type="submit">
+                </form>
+                <% business.tips.forEach(function(tip) { %>
+                <div class="tip-container row">
+                    <div class="col-md-9">
+                        <%= tip.tipText %>
+                    </div>
+                    <div class="col-md-3">
+                        <%= tip.tipRating %> Points<br><i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                        <i class="fa fa-thumbs-down" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-container">
+                
+            </div>
+        </div>
     </div>
 </body>
 </html>
