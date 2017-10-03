@@ -1,0 +1,30 @@
+<% include partials/header.ejs %>
+<title>Ask a Resident</title>
+</head>
+<body>
+    <% include partials/navbar.ejs %>
+    <div class="container">
+        <div class="question-card">
+            <%= question %>
+            <h2><%= question.question %></h2>
+            <div class="answer-card answer-box">
+                <form class="qanda" action="/ask/<%= question._id %>/answer" method="POST">
+                    <textarea name="answer" placeholder="Ask a Question"></textarea><br>
+                    <input class="btn btn-primary" type="submit">
+                </form>
+            </div>
+            <hr>
+            <% if (question.answers.length < 1) { %>
+            <h4>No answers yet!</h4>
+            <% } else { %>
+            <% question.answers.forEach(function(answer) { %>
+            <div class="answer-card">
+                <%= answer.answerText %>
+            </div>
+            <hr>
+            <% }) %>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

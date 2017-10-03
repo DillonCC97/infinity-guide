@@ -1,10 +1,10 @@
-var port = 3000;
+var port = 3001;
 var express = require("express");
 var app = express();
 var mongoose = require("mongoose");
 mongoose.connect("mongodb://localhost/nearby");
 var bodyparser = require("body-parser");
-var session = require('express-session');
+const uuidv4 = require('uuid/v4');
 app.use(bodyparser.urlencoded({
     extended: true
 }));
@@ -12,45 +12,9 @@ var methodOverride = require("method-override");
 app.use(methodOverride("_method"));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
-var passport = require('passport'),
-    LocalStrategy = require('passport-local').Strategy;
-var passportLocalMongoose = require('passport-local-mongoose');
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(session({
-    secret: 'infinityhall'
-}));
-passport.use(new LocalStrategy(function(username, password, done) {
-    User.findOne({
-        username: username
-    }, function(err, user) {
-        if(err) {
-            return done(err);
-        }
-        if(!user) {
-            return done(null, false, {
-                message: 'Incorrect username.'
-            });
-        }
-        if(!user.validPassword(password)) {
-            return done(null, false, {
-                message: 'Incorrect password.'
-            });
-        }
-        return done(null, user);
-    });
-}));
-var Account = require('./models/account');
-passport.use(new LocalStrategy(Account.authenticate()));
-passport.serializeUser(Account.serializeUser());
-passport.deserializeUser(Account.deserializeUser());
-var UserSchema = new mongoose.Schema({
-    username: String,
-    password: String
-});
-//UserSchema.plugin(passportLocalMongoose);
-module.exports = mongoose.model('User', UserSchema);
-var dbSchema = new mongoose.Schema({
+
+
+var businessSchema = new mongoose.Schema({
     name: String,
     description: String,
     address: String,
@@ -60,7 +24,12 @@ var dbSchema = new mongoose.Schema({
     tips: Array,
     rating: Array
 });
-var Business = mongoose.model("Business", dbSchema);
+var Business = mongoose.model("Business", businessSchema);
+var questionSchema = new mongoose.Schema({
+    question: String,
+    answers: Array
+});
+var Question = mongoose.model("Question", questionSchema);
 app.get("/", function(req, res) {
     console.log("index page requested");
     Business.find({}, function(err, data) {
@@ -80,28 +49,13 @@ app.get("/login", function(req, res) {
     console.log("login page requested");
     res.render("login.ejs");
 });
-app.post('/login', passport.authenticate('local', {
-    successRedirect: '/nearby/new',
-    failureRedirect: '/login'
-}));
+
 app.get('/register', function(req, res) {
     console.log("register page requested");
     res.render("register.ejs");
 })
 app.post('/register', function(req, res) {
-    Account.register(new Account({
-        username: req.body.username
-    }), req.body.password, function(err, account) {
-        if(err) {
-            console.log(err);
-            return res.render('register', {
-                account: account
-            });
-        }
-        passport.authenticate('local')(req, res, function() {
-            res.redirect('/nearby');
-        });
-    });
+    
 });
 app.post("/nearby", function(req, res) {
     console.log(req.body);
@@ -216,6 +170,7 @@ app.post("/:business_id/newtip", function(req, res) {
     }, {
         $push: {
             tips: {
+                tipID: uuidv4(),
                 tipText: req.body.tip,
                 tipRating: 0
             }
@@ -245,18 +200,89 @@ app.post("/:business_id/newrating", function(req, res) {
         });
     }
 });
-app.post("/:business_id/:tip_index/thumbup", function(req, res) {
-    
+app.post("/nearby/:business_id/:tipID/thumbup", function(req, res) {
+    Business.update({'tips.tipID': req.params.tipID}, {'$inc': {
+        'tips.$.tipRating': 1
+    }}, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            res.redirect("/nearby/" + req.params.business_id + "#upvote-" + req.params.tipID);
+        }
+    });
 });
-Business.findByIdAndUpdate("59c2efdeec53070c784cc8ea", {
-    tips: []
-}, function(err, data) {
-    if(err) {
-        console.log(err)
-    } else {
-        console.log(data);
-    }
+
+app.post("/nearby/:business_id/:tipID/thumbdown", function(req, res) {
+    Business.update({'tips.tipID': req.params.tipID}, {'$inc': {
+        'tips.$.tipRating': -1
+    }}, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            res.redirect("/nearby/" + req.params.business_id + "#downvote-" + req.params.tipID);
+        }
+    });
 });
+
+app.post("/ask/new", function(req, res) {
+    var newQuestion = new Question({
+        question: req.body.question,
+        answers: []
+    });
+    console.log(newQuestion);
+    console.log(req.body.question);
+    newQuestion.save(function(err, question) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log(question);
+            res.redirect("/ask");
+        }
+    });
+});
+
+app.get("/ask", function(req, res) {
+    Question.find({}, function(err, data) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.render("ask.ejs", {questions: data});
+        }
+    });
+});
+
+app.get("/ask/:questionID", function(req, res) {
+    Question.find({
+        _id: req.params.questionID
+    }, function(err, data) {
+        if(err) {
+            console.log(err);
+        } else {
+            res.render("question.ejs", {question: data[0]});
+        }
+    });
+});
+
+app.post("/ask/:questionID/answer", function(req, res) {
+    Question.update({
+        _id: req.params.questionID
+    }, {
+        $push: {
+            answers: {
+                answerID: uuidv4(),
+                answerText: req.body.answer,
+                answerRating: 0
+            }
+        }
+    }, function(err, data) {
+        if(err) {
+            console.log(err);
+        } else {
+            res.redirect("/ask/" + req.params.questionID);
+        }
+    });
+})
+
 app.listen(port, function() {
     console.log("Listening on port " + port);
 });

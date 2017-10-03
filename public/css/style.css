@@ -150,3 +150,53 @@ i.fa-star, i.fa-star-half-o {
     margin: 0;
     display: inline;
 }
+
+.tip-container>div.col-md-3>div {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.tip-container>div.col-md-3>div>div {
+    padding: 0 5px;
+}
+
+.tip-container h4 {
+    margin: 0;
+    min-width: 37px;
+}
+
+.question-card {
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 2px 2px 15px 0px rgba(0,0,0,0.75);
+    padding: 10px;
+    width: 100%;
+    margin: 10px auto;
+}
+
+form.qanda {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+form.qanda textarea {
+    width: 80%;
+    border-radius: .25rem;
+    margin-right: 10px;
+}
+
+form.qanda input[type="submit"] {
+    width: 19%;
+}
+
+.question-card.question {
+    cursor: pointer;
+}
+
+.question-card.question:hover {
+    background: #e5e5e5;
+}

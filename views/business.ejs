@@ -67,12 +67,25 @@
                 </form>
                 <% business.tips.forEach(function(tip) { %>
                 <div class="tip-container row">
+                    <div class="col-md-3">
+                        <div>
+                            <div>
+                                <div>
+                                    <h4><%= tip.tipRating %></h4>
+                                </div>
+                            </div>
+                            <div>
+                                <form id="upvote-<%= tip.tipID %>" method="post" action="/nearby/<%= business._id %>/<%= tip.tipID %>/thumbup">
+                                    <i onClick="document.getElementById('upvote-<%= tip.tipID %>').submit();" class="fa fa-thumbs-up" aria-hidden="true"></i>
+                                </form>
+                                <form id="downvote-<%= tip.tipID %>" method="post" action="/nearby/<%= business._id %>/<%= tip.tipID %>/thumbdown">
+                                    <i onClick="document.getElementById('downvote-<%= tip.tipID %>').submit();" class="fa fa-thumbs-down" aria-hidden="true"></i>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-9">
                         <%= tip.tipText %>
-                    </div>
-                    <div class="col-md-3">
-                        <%= tip.tipRating %> Points<br><i class="fa fa-thumbs-up" aria-hidden="true"></i>
-                        <i class="fa fa-thumbs-down" aria-hidden="true"></i>
                     </div>
                 </div>
                 <% }); %>
