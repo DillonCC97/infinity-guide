@@ -8,10 +8,40 @@ const uuidv4 = require('uuid/v4');
 app.use(bodyparser.urlencoded({
     extended: true
 }));
+var User = require("./models/user");
 var methodOverride = require("method-override");
+var passport = require("passport");
+var LocalStrategy = require("passport-local");
+var passportLocalMongoose = require("passport-local-mongoose");
 app.use(methodOverride("_method"));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
+app.use(require("express-session")({
+    secret: "code institute infinity guide random words",
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(function(req, res, next) {
+    res.locals.loggedIn = req.isAuthenticated();
+    next();
+});
+function getPosition(string, subString, index) {
+   return string.split(subString, index).join(subString).length;
+}
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+function isLoggedIn(req, res, next) {
+    if(req.isAuthenticated()) {
+        return next();
+    } else {
+        res.redirect("/login");
+    }
+}
 
 
 var businessSchema = new mongoose.Schema({
@@ -49,13 +79,38 @@ app.get("/login", function(req, res) {
     console.log("login page requested");
     res.render("login.ejs");
 });
-
+app.get("/login/fail", function(req, res) {
+    res.render("login.ejs");
+});
+app.post("/login", passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/login/fail"
+}), function(req, res){});
+app.get("/logout", isLoggedIn, function(req, res){
+    req.logout();
+    res.redirect("/login");
+})
 app.get('/register', function(req, res) {
     console.log("register page requested");
     res.render("register.ejs");
+});
+app.get('/register/userexists', function(req, res){
+    res.render("register.ejs");
 })
 app.post('/register', function(req, res) {
-    
+    User.register(new User({
+        username: req.body.username
+    }), req.body.password, function(err, user) {
+        if(err) {
+            if(err.name == "UserExistsError") {
+                return res.redirect("/register/userexists");
+            }
+        } else {
+            passport.authenticate("local")(req, res, function() {
+                res.redirect("/");
+            });
+        }
+    });
 });
 app.post("/nearby", function(req, res) {
     console.log(req.body);
@@ -123,14 +178,14 @@ app.get("/nearby", function(req, res) {
         }
     });
 });
-app.get("/nearby/new", function(req, res) {
+app.get("/nearby/new", isLoggedIn, function(req, res) {
     console.log("new business page requested");
     console.log(req.user);
     res.render("new.ejs", {
         user: req.user
     });
 });
-app.post("/nearby/new", function(req, res) {
+app.post("/nearby/new", isLoggedIn, function(req, res) {
     var newBusiness = new Business({
         name: req.body.name,
         description: req.body.description,
@@ -164,7 +219,7 @@ app.get("/nearby/:business_id", function(req, res) {
         }
     });
 });
-app.post("/:business_id/newtip", function(req, res) {
+app.post("/:business_id/newtip", isLoggedIn, function(req, res) {
     Business.update({
         _id: req.params.business_id
     }, {
@@ -183,7 +238,7 @@ app.post("/:business_id/newtip", function(req, res) {
         }
     });
 });
-app.post("/:business_id/newrating", function(req, res) {
+app.post("/:business_id/newrating", isLoggedIn, function(req, res) {
     if(req.body.rating > 0 && req.body.rating < 6 && req.body.rating % 1 === 0) {
         Business.update({
             _id: req.params.business_id
@@ -200,7 +255,7 @@ app.post("/:business_id/newrating", function(req, res) {
         });
     }
 });
-app.post("/nearby/:business_id/:tipID/thumbup", function(req, res) {
+app.post("/nearby/:business_id/:tipID/thumbup", isLoggedIn, function(req, res) {
     Business.update({'tips.tipID': req.params.tipID}, {'$inc': {
         'tips.$.tipRating': 1
     }}, function(err) {
@@ -212,7 +267,7 @@ app.post("/nearby/:business_id/:tipID/thumbup", function(req, res) {
     });
 });
 
-app.post("/nearby/:business_id/:tipID/thumbdown", function(req, res) {
+app.post("/nearby/:business_id/:tipID/thumbdown", isLoggedIn, function(req, res) {
     Business.update({'tips.tipID': req.params.tipID}, {'$inc': {
         'tips.$.tipRating': -1
     }}, function(err) {
@@ -224,7 +279,7 @@ app.post("/nearby/:business_id/:tipID/thumbdown", function(req, res) {
     });
 });
 
-app.post("/ask/new", function(req, res) {
+app.post("/ask/new", isLoggedIn, function(req, res) {
     var newQuestion = new Question({
         question: req.body.question,
         answers: []
@@ -263,7 +318,7 @@ app.get("/ask/:questionID", function(req, res) {
     });
 });
 
-app.post("/ask/:questionID/answer", function(req, res) {
+app.post("/ask/:questionID/answer", isLoggedIn, function(req, res) {
     Question.update({
         _id: req.params.questionID
     }, {
@@ -281,7 +336,32 @@ app.post("/ask/:questionID/answer", function(req, res) {
             res.redirect("/ask/" + req.params.questionID);
         }
     });
-})
+});
+
+app.post("/ask/:questionID/:answerID/thumbup", isLoggedIn, function(req, res) {
+    Question.update({'answers.answerID': req.params.answerID}, {'$inc': {
+        'answers.$.answerRating': 1
+    }}, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            res.redirect("/ask/" + req.params.questionID + "#upvote-" + req.params.answerID);
+        }
+    });
+});
+
+app.post("/ask/:questionID/:answerID/thumbdown", isLoggedIn, function(req, res) {
+    Question.update({'answers.answerID': req.params.answerID}, {'$inc': {
+        'answers.$.answerRating': -1
+    }}, function(err) {
+        if(err) {
+            console.log(err);
+        } else {
+            res.redirect("/ask/" + req.params.questionID + "#downvote-" + req.params.answerID);
+        }
+    });
+});
+
 
 app.listen(port, function() {
     console.log("Listening on port " + port);

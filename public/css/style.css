@@ -151,7 +151,7 @@ i.fa-star, i.fa-star-half-o {
     display: inline;
 }
 
-.tip-container>div.col-md-3>div {
+.user-input-row>div.col-md-3>div {
     height: 100%;
     width: 100%;
     display: flex;
@@ -159,11 +159,11 @@ i.fa-star, i.fa-star-half-o {
     text-align: center;
 }
 
-.tip-container>div.col-md-3>div>div {
+.user-input-row>div.col-md-3>div>div {
     padding: 0 5px;
 }
 
-.tip-container h4 {
+.user-input-row h4 {
     margin: 0;
     min-width: 37px;
 }

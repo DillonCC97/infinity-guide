@@ -5,11 +5,10 @@
     <% include partials/navbar.ejs %>
     <div class="container">
         <div class="question-card">
-            <%= question %>
             <h2><%= question.question %></h2>
             <div class="answer-card answer-box">
                 <form class="qanda" action="/ask/<%= question._id %>/answer" method="POST">
-                    <textarea name="answer" placeholder="Ask a Question"></textarea><br>
+                    <textarea name="answer" placeholder="Answer"></textarea><br>
                     <input class="btn btn-primary" type="submit">
                 </form>
             </div>
@@ -19,7 +18,28 @@
             <% } else { %>
             <% question.answers.forEach(function(answer) { %>
             <div class="answer-card">
-                <%= answer.answerText %>
+                <div class="user-input-row row">
+                    <div class="col-md-3">
+                        <div>
+                            <div>
+                                <div>
+                                    <h4><%= answer.answerRating %></h4>
+                                </div>
+                            </div>
+                            <div>
+                                <form id="upvote-<%= answer.answerID %>" method="post" action="/ask/<%= question._id %>/<%= answer.answerID %>/thumbup">
+                                    <i onClick="document.getElementById('upvote-<%= answer.answerID %>').submit();" class="fa fa-thumbs-up" aria-hidden="true"></i>
+                                </form>
+                                <form id="downvote-<%= answer.answerID %>" method="post" action="/ask/<%= question._id %>/<%= answer.answerID %>/thumbdown">
+                                    <i onClick="document.getElementById('downvote-<%= answer.answerID %>').submit();" class="fa fa-thumbs-down" aria-hidden="true"></i>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <%= answer.answerText %>
+                    </div>
+                </div>
             </div>
             <hr>
             <% }) %>

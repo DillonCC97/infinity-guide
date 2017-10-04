@@ -15,9 +15,18 @@
         <li id="nav-ask" class="nav-item">
             <a class="nav-link" href="/ask">Ask</a>
         </li>
-        <li id="nav-login" class="nav-item">
-            <a class="nav-link" href="/login">Login</a>
+        <% if(loggedIn) { %>
+        <li id="nav-logout" class="nav-item">
+            <a class="nav-link" href="/logout">Log Out</a>
         </li>
+        <% } else { %>
+        <li id="nav-login" class="nav-item">
+            <a class="nav-link" href="/login">Log In</a>
+        </li>
+        <li id="nav-register" class="nav-item">
+            <a class="nav-link" href="/register">Register</a>
+        </li>
+        <% } %>
       </ul>
     </div>
 </nav>

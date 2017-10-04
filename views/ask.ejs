@@ -17,7 +17,14 @@
         <p>No Answers Yet</p>
         <% } else { %>
         <p><%= question.answers.length %> Answers</p>
-        <p><%= question.answers[0] %></p>
+        <% for(var i = 0; i < 3; i++) { %>
+            <% if(question.answers[i]) { %>
+            <hr>
+        <div>
+            <%= question.answers[i].answerText %>
+        </div>
+        <% } %>
+        <% } %>
         <% } %>
     </div>
     <% }) %>

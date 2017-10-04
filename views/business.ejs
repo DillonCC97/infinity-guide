@@ -1,5 +1,5 @@
 <% include partials/header.ejs %>
-<title>Point of Interest - <%= business.name %></title>
+<!-- <title>Point of Interest - <%= //business.name %></title> -->
 </head>
 <body>
     <% include partials/navbar.ejs %>
@@ -66,7 +66,7 @@
                     <input type="submit">
                 </form>
                 <% business.tips.forEach(function(tip) { %>
-                <div class="tip-container row">
+                <div class="tip-container user-input-row row">
                     <div class="col-md-3">
                         <div>
                             <div>
