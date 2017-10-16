@@ -28,5 +28,10 @@
         </li>
         <% } %>
       </ul>
+      <% if(user) { %>
+      <span class="navbar-text">
+         Logged in as <%= user.username %>
+     </span>
+      <% } %>
     </div>
 </nav>

@@ -3,10 +3,15 @@
 </head>
 <body>
     <% include partials/navbar.ejs %>
+    <% var userRating; %>
     <div id="business" class="container text-container">
         <img src="<%= business.image %>">
         <h1><%= business.name %></h1>
         <h3><%= business.address %></h3>
+        <% business.rating.forEach(function(rating) { %>
+            <% if(rating.user == user._id.toString()) { %>
+            <% userRating = rating.ratingVal; %>
+        <% }}); %>
         
         <form method="post" action="/<%= business._id %>/newrating">
             <% if (business.rating.length == 0) { %>
@@ -14,7 +19,7 @@
         <% } else { %>
         <% var totalRating = 0; %>
         <% business.rating.forEach(function(rating) { %>
-        <% totalRating += parseInt(rating); %>
+        <% totalRating += parseInt(rating.ratingVal); %>
         <% }); %>
         <%for(var i = 0; i < (totalRating / business.rating.length) - ((totalRating / business.rating.length) % 1); i++) {  %>
             <i class="fa fa-star" aria-hidden="true"></i>
@@ -29,27 +34,27 @@
             <br>
             <div class="form-check form-check-inline">
                 <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="rating" value="1"> 1
+                    <input class="form-check-input" type="radio" name="rating" value="1" <% if(userRating == 1) { %><%= "checked" %> <% } %></input> 1
                 </label>
             </div>
             <div class="form-check form-check-inline">
                 <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="rating" value="2"> 2
+                    <input class="form-check-input" type="radio" name="rating" value="2" <% if(userRating == 2) { %><%= "checked" %> <% } %>> 2
                 </label>
             </div>
             <div class="form-check form-check-inline">
                 <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="rating" value="3"> 3
+                    <input class="form-check-input" type="radio" name="rating" value="3" <% if(userRating == 3) { %><%= "checked" %> <% } %>> 3
                 </label>
             </div>
             <div class="form-check form-check-inline">
                 <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="rating" value="4"> 4
+                    <input class="form-check-input" type="radio" name="rating" value="4" <% if(userRating == 4) { %><%= "checked" %> <% } %>> 4
                 </label>
             </div>
             <div class="form-check form-check-inline">
                 <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="rating" value="5"> 5
+                    <input class="form-check-input" type="radio" name="rating" value="5" <% if(userRating == 5) { %><%= "checked" %> <% } %>> 5
                 </label>
             </div>
             <input type="submit">
