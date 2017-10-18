@@ -4,15 +4,29 @@
 <body>
     <% include partials/navbar.ejs %>
     <div class="container">
-        <div class="question-card ask-box">
-            <form class="qanda" action="/ask/new" method="POST">
-                <textarea name="question" placeholder="Ask a Question"></textarea><br>
-            <input class="btn btn-primary" type="submit">
-        </form>
+        <div class="form-container row">
+            <div class="col-md-6">
+                <div class="question-card search-box">
+                    <form class="qanda" action="/ask/search" method="GET">
+                        <textarea name="search" placeholder="Search for a Question"></textarea>
+                        <input class="btn btn-primary" type="submit">
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="question-card ask-box">
+                    <form class="qanda" action="/ask/new" method="POST">
+                        <textarea name="question" placeholder="Ask a Question"></textarea><br>
+                        <input class="btn btn-primary" type="submit">
+                    </form>
+                </div>
+            </div>
         </div>
     <% questions.forEach(function(question) { %>
     <div class="question-card question" onclick="location.href='/ask/<%= question._id %>';">
         <h3><%= question.question %></h3>
+        <small>Asked by <%= question.asker %></small>
         <% if(question.answers.length < 1) { %>
         <p>No Answers Yet</p>
         <% } else { %>

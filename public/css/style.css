@@ -1,3 +1,7 @@
+* {
+    font-family: 'Muli', sans-serif;
+}
+
 #results-container {
     background: #d3d3d3;
     display: flex;
@@ -93,6 +97,7 @@ div#search-container {
     padding: 10px;
     width: 100%;
     margin: 10px auto;
+    overflow: hidden;
 }
 
 #home .jumbotron>h1 {
@@ -126,11 +131,16 @@ div.col-md-6 {
 }
 
 #new-tip>input[type="text"] {
-    width: 84%;
+    width: 79%;
+    border-radius: 0.25rem;
+    height: 38px;
+    border: 1px solid #d3d3d3;
 }
 
 #new-tip>input[type="submit"] {
-    width: 14%;
+    width: 20%;
+    display: block;
+    float: right;
 }
 
 i.fa-star, i.fa-star-half-o {
@@ -199,4 +209,18 @@ form.qanda input[type="submit"] {
 
 .question-card.question:hover {
     background: #e5e5e5;
+}
+
+.row {
+    margin: 0px;
+}
+
+.no-tips {
+    color: #a8a8a8;
+    text-align: center;
+    height: 65px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

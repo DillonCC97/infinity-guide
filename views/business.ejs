@@ -8,10 +8,11 @@
         <img src="<%= business.image %>">
         <h1><%= business.name %></h1>
         <h3><%= business.address %></h3>
+        <% if(user) { %>
         <% business.rating.forEach(function(rating) { %>
             <% if(rating.user == user._id.toString()) { %>
             <% userRating = rating.ratingVal; %>
-        <% }}); %>
+        <% }});} %>
         
         <form method="post" action="/<%= business._id %>/newrating">
             <% if (business.rating.length == 0) { %>
@@ -34,7 +35,7 @@
             <br>
             <div class="form-check form-check-inline">
                 <label class="form-check-label">
-                    <input class="form-check-input" type="radio" name="rating" value="1" <% if(userRating == 1) { %><%= "checked" %> <% } %></input> 1
+                    <input class="form-check-input" type="radio" name="rating" value="1" <% if(userRating == 1) { %><%= "checked" %> <% } %>> 1
                 </label>
             </div>
             <div class="form-check form-check-inline">
@@ -57,7 +58,7 @@
                     <input class="form-check-input" type="radio" name="rating" value="5" <% if(userRating == 5) { %><%= "checked" %> <% } %>> 5
                 </label>
             </div>
-            <input type="submit">
+            <input class="btn btn-primary" type="submit">
         </form>
         <p>Phone: <%= business.phone %></p>
         <p>Hours: <%= business.hours %></p>
@@ -68,15 +69,26 @@
             <div class="text-container">
                 <form id="new-tip" method="post" action="/<%= business._id %>/newtip">
                     <input type="text" name="tip">
-                    <input type="submit">
+                    <input class="btn btn-primary" type="submit">
                 </form>
+                <% if (business.tips.length < 1) { %>
+                <div class="no-tips">
+                    <p>Be the first one to leave a tip for <%= business.name %></p>
+                </div>
+                <% } else { %>
                 <% business.tips.forEach(function(tip) { %>
+                <% var totalRating = 0 %>
+                <% tip.tipRating.forEach(function(tipRating){ %>
+                                        <% console.log(tipRating.rating) %>
+                                        <% totalRating += tipRating.rating %>
+                                    <% }) %>
+                <% if(totalRating > -5) { %>
                 <div class="tip-container user-input-row row">
                     <div class="col-md-3">
                         <div>
                             <div>
                                 <div>
-                                    <h4><%= tip.tipRating %></h4>
+                                    <h4><%= totalRating %></h4>
                                 </div>
                             </div>
                             <div>
@@ -93,7 +105,8 @@
                         <%= tip.tipText %>
                     </div>
                 </div>
-                <% }); %>
+                <% } %>
+                <% });} %>
             </div>
         </div>
         <div class="col-md-6">

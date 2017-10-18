@@ -6,6 +6,7 @@
     <div class="container">
         <div class="question-card">
             <h2><%= question.question %></h2>
+            <small>Asked by <%= question.asker %></small>
             <div class="answer-card answer-box">
                 <form class="qanda" action="/ask/<%= question._id %>/answer" method="POST">
                     <textarea name="answer" placeholder="Answer"></textarea><br>
@@ -23,7 +24,11 @@
                         <div>
                             <div>
                                 <div>
-                                    <h4><%= answer.answerRating %></h4>
+                                    <% var totalRating = 0; %>
+        <% answer.answerRating.forEach(function(rating) { %>
+        <% totalRating += parseInt(rating.rating); %>
+        <% }); %>
+                                    <h4><%= totalRating %></h4>
                                 </div>
                             </div>
                             <div>

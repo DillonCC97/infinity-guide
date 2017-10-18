@@ -56,6 +56,7 @@ var businessSchema = new mongoose.Schema({
 var Business = mongoose.model("Business", businessSchema);
 var questionSchema = new mongoose.Schema({
     question: String,
+    asker: String,
     answers: Array
 });
 var Question = mongoose.model("Question", questionSchema);
@@ -115,13 +116,13 @@ app.post('/register', function(req, res) {
         }
     });
 });
-app.post("/nearby", function(req, res) {
+app.get("/nearby/search", function(req, res) {
     console.log(req.body);
     console.log("search requested");
-    if(req.body.searchType == "name") {
+    if(req.query.searchType == "name") {
         Business.find({
             name: {
-                $regex: req.body.searchString,
+                $regex: req.query.searchString,
                 $options: 'i'
             }
         }, null, {
@@ -138,10 +139,10 @@ app.post("/nearby", function(req, res) {
                 });
             }
         });
-    } else if(req.body.searchType == "address") {
+    } else if(req.query.searchType == "address") {
         Business.find({
             address: {
-                $regex: req.body.searchString,
+                $regex: req.query.searchString,
                 $options: 'i'
             }
         }, null, {
@@ -158,10 +159,10 @@ app.post("/nearby", function(req, res) {
                 });
             }
         });
-    } else if(req.body.searchType == "description") {
+    } else if(req.query.searchType == "description") {
         Business.find({
             description: {
-                $regex: req.body.searchString,
+                $regex: req.query.searchString,
                 $options: 'i'
             }
         }, null, {
@@ -250,7 +251,7 @@ app.post("/:business_id/newtip", isLoggedIn, function(req, res) {
             tips: {
                 tipID: uuidv4(),
                 tipText: req.body.tip,
-                tipRating: 0
+                tipRating: []
             }
         }
     }, function(err, data) {
@@ -319,38 +320,139 @@ app.post("/:business_id/newrating", isLoggedIn, function(req, res) {
     }
 });
 app.post("/nearby/:business_id/:tipID/thumbup", isLoggedIn, function(req, res) {
-    Business.update({
-        'tips.tipID': req.params.tipID
-    }, {
-        '$inc': {
-            'tips.$.tipRating': 1
-        }
-    }, function(err) {
+    Business.find({
+        _id: req.params.business_id
+    }, function(err, data) {
         if(err) {
             console.log(err);
         } else {
-            res.redirect("/nearby/" + req.params.business_id + "#upvote-" + req.params.tipID);
+            var voteID;
+            var hasVoted = false;
+            data[0].tips.forEach(function(tip) {
+                if(tip.tipID == req.params.tipID) {
+                    tip.tipRating.forEach(function(tipRating) {
+                        if(tipRating.user == req.user._id.toString()) {
+                            hasVoted = true;
+                            voteID = tipRating.voteID;
+                        }
+                    });
+                }
+            });
+            if(hasVoted) {
+                Business.findById(req.params.business_id, function(err, business) {
+                    var tipIndex;
+                    for(var i = 0; i < business.tips.length; i++) {
+                        if(business.tips[i].tipID == req.params.tipID) {
+                            tipIndex = i;
+                        }
+                    }
+                    var ratingIndex;
+                    for(var i = 0; i < business.tips[tipIndex].tipRating.length; i++) {
+                        if(business.tips[tipIndex].tipRating[i].user == req.user._id.toString()) {
+                            ratingIndex = i;
+                        }
+                    }
+                    business.tips[tipIndex].tipRating[ratingIndex].rating = 1;
+                    business.markModified('tips');
+                    business.save(function(err, updatedBusiness) {
+                        if(err) {
+                            console.log(err);
+                        } else {
+                            res.redirect("/nearby/" + req.params.business_id + "#upvote-" + req.params.tipID);
+                        }
+                    });
+                });
+            } else {
+                Business.update({
+                    'tips.tipID': req.params.tipID
+                }, {
+                    '$push': {
+                        'tips.$.tipRating': {
+                            user: req.user._id.toString(),
+                            rating: 1,
+                            voteID: uuidv4()
+                        }
+                    }
+                }, function(err) {
+                    if(err) {
+                        console.log(err);
+                    } else {
+                        res.redirect("/nearby/" + req.params.business_id + "#upvote-" + req.params.tipID);
+                    }
+                });
+            }
         }
     });
 });
 app.post("/nearby/:business_id/:tipID/thumbdown", isLoggedIn, function(req, res) {
-    Business.update({
-        'tips.tipID': req.params.tipID
-    }, {
-        '$inc': {
-            'tips.$.tipRating': -1
-        }
-    }, function(err) {
+    Business.find({
+        _id: req.params.business_id
+    }, function(err, data) {
         if(err) {
             console.log(err);
         } else {
-            res.redirect("/nearby/" + req.params.business_id + "#downvote-" + req.params.tipID);
+            var voteID;
+            var hasVoted = false;
+            data[0].tips.forEach(function(tip) {
+                if(tip.tipID == req.params.tipID) {
+                    tip.tipRating.forEach(function(tipRating) {
+                        if(tipRating.user == req.user._id.toString()) {
+                            hasVoted = true;
+                            voteID = tipRating.voteID;
+                        }
+                    });
+                }
+            });
+            if(hasVoted) {
+                Business.findById(req.params.business_id, function(err, business) {
+                    var tipIndex;
+                    for(var i = 0; i < business.tips.length; i++) {
+                        if(business.tips[i].tipID == req.params.tipID) {
+                            tipIndex = i;
+                        }
+                    }
+                    var ratingIndex;
+                    for(var i = 0; i < business.tips[tipIndex].tipRating.length; i++) {
+                        if(business.tips[tipIndex].tipRating[i].user == req.user._id.toString()) {
+                            ratingIndex = i;
+                        }
+                    }
+                    business.tips[tipIndex].tipRating[ratingIndex].rating = -1;
+                    business.markModified('tips');
+                    business.save(function(err, updatedBusiness) {
+                        if(err) {
+                            console.log(err);
+                        } else {
+                            res.redirect("/nearby/" + req.params.business_id + "#upvote-" + req.params.tipID);
+                        }
+                    });
+                });
+            } else {
+                Business.update({
+                    'tips.tipID': req.params.tipID
+                }, {
+                    '$push': {
+                        'tips.$.tipRating': {
+                            user: req.user._id.toString(),
+                            rating: -1,
+                            voteID: uuidv4()
+                        }
+                    }
+                }, function(err) {
+                    if(err) {
+                        console.log(err);
+                    } else {
+                        res.redirect("/nearby/" + req.params.business_id + "#upvote-" + req.params.tipID);
+                    }
+                });
+            }
         }
     });
 });
 app.post("/ask/new", isLoggedIn, function(req, res) {
     var newQuestion = new Question({
         question: req.body.question,
+        asker: req.user.username,
         answers: []
     });
     console.log(newQuestion);
@@ -369,6 +471,28 @@ app.get("/ask", function(req, res) {
         if(err) {
             console.log(err);
         } else {
+            res.render("ask.ejs", {
+                questions: data
+            });
+        }
+    });
+});
+app.get("/ask/search", function(req, res) {
+    Question.find({
+        question: {
+            $regex: req.query.search,
+            $options: 'i'
+        }
+    }, null, {
+        sort: {
+            search: 1
+        }
+    }, function(err, data) {
+        if(err) {
+            console.log(err);
+            res.redirect("/ask");
+        } else {
+            console.log(data);
             res.render("ask.ejs", {
                 questions: data
             });
@@ -396,44 +520,152 @@ app.post("/ask/:questionID/answer", isLoggedIn, function(req, res) {
             answers: {
                 answerID: uuidv4(),
                 answerText: req.body.answer,
-                answerRating: 0
+                answerRating: []
             }
         }
     }, function(err, data) {
         if(err) {
-            console.log(err);
+            console.log("528");
         } else {
             res.redirect("/ask/" + req.params.questionID);
         }
     });
 });
 app.post("/ask/:questionID/:answerID/thumbup", isLoggedIn, function(req, res) {
-    Question.update({
-        'answers.answerID': req.params.answerID
-    }, {
-        '$inc': {
-            'answers.$.answerRating': 1
-        }
-    }, function(err) {
+    Question.find({
+        _id: req.params.questionID
+    }, function(err, data) {
         if(err) {
-            console.log(err);
+            console.log("540");
+            res.send("here 540");
         } else {
-            res.redirect("/ask/" + req.params.questionID + "#upvote-" + req.params.answerID);
+            var voteID;
+            var hasVoted = false;
+            data[0].answers.forEach(function(answer) {
+                if(answer.answerID == req.params.answerID) {
+                    answer.answerRating.forEach(function(answerRating) {
+                        if(answerRating.user == req.user._id.toString()) {
+                            hasVoted = true;
+                            voteID = answerRating.voteID;
+                        }
+                    });
+                }
+            });
+            if(hasVoted) {
+                Question.findById(req.params.questionID, function(err, question) {
+                    var answerIndex;
+                    for(var i = 0; i < question.answers.length; i++) {
+                        if(question.answers[i].answerID == req.params.answerID) {
+                            answerIndex = i;
+                        }
+                    }
+                    var ratingIndex;
+                    for(var i = 0; i < question.answers[answerIndex].answerRating.length; i++) {
+                        if(question.answers[answerIndex].answerRating[i].user == req.user._id.toString()) {
+                            ratingIndex = i;
+                        }
+                    }
+                    question.answers[answerIndex].answerRating[ratingIndex].rating = 1;
+                    question.markModified('answers');
+                    question.save(function(err, updatedQuestion) {
+                        if(err) {
+                            console.log("572");
+                                        res.send("here 572");
+                        } else {
+                            res.redirect("/ask/" + req.params.questionID + "#downvote" + req.params.answerID)
+                        }
+                    });
+                });
+            } else {
+                Question.update({
+                    'answers.answerID': req.params.answerID
+                }, {
+                    '$push': {
+                        'answers.$.answerRating': {
+                            user: req.user._id.toString(),
+                            rating: 1,
+                            voteID: uuidv4() // Fix?
+                        }
+                    }
+                }, function(err) {
+                    if(err) {
+                        console.log("593");
+                                    res.send("here 593");
+
+                    } else {
+                        res.redirect("/ask/" + req.params.questionID + "#downvote" + req.params.answerID)
+                    }
+                });
+            }
         }
     });
 });
 app.post("/ask/:questionID/:answerID/thumbdown", isLoggedIn, function(req, res) {
-    Question.update({
-        'answers.answerID': req.params.answerID
-    }, {
-        '$inc': {
-            'answers.$.answerRating': -1
-        }
-    }, function(err) {
+    Question.find({
+        _id: req.params.questionID
+    }, function(err, data) {
         if(err) {
-            console.log(err);
+            console.log("540");
+            res.send("here 540");
         } else {
-            res.redirect("/ask/" + req.params.questionID + "#downvote-" + req.params.answerID);
+            var voteID;
+            var hasVoted = false;
+            data[0].answers.forEach(function(answer) {
+                if(answer.answerID == req.params.answerID) {
+                    answer.answerRating.forEach(function(answerRating) {
+                        if(answerRating.user == req.user._id.toString()) {
+                            hasVoted = true;
+                            voteID = answerRating.voteID;
+                        }
+                    });
+                }
+            });
+            if(hasVoted) {
+                Question.findById(req.params.questionID, function(err, question) {
+                    var answerIndex;
+                    for(var i = 0; i < question.answers.length; i++) {
+                        if(question.answers[i].answerID == req.params.answerID) {
+                            answerIndex = i;
+                        }
+                    }
+                    var ratingIndex;
+                    for(var i = 0; i < question.answers[answerIndex].answerRating.length; i++) {
+                        if(question.answers[answerIndex].answerRating[i].user == req.user._id.toString()) {
+                            ratingIndex = i;
+                        }
+                    }
+                    question.answers[answerIndex].answerRating[ratingIndex].rating = -1;
+                    question.markModified('answers');
+                    question.save(function(err, updatedQuestion) {
+                        if(err) {
+                            console.log("572");
+                                        res.send("here 572");
+                        } else {
+                            res.redirect("/ask/" + req.params.questionID + "#downvote" + req.params.answerID)
+                        }
+                    });
+                });
+            } else {
+                Question.update({
+                    'answers.answerID': req.params.answerID
+                }, {
+                    '$push': {
+                        'answers.$.answerRating': {
+                            user: req.user._id.toString(),
+                            rating: -1,
+                            voteID: uuidv4() // Fix?
+                        }
+                    }
+                }, function(err) {
+                    if(err) {
+                        console.log("593");
+                                    res.send("here 593");
+
+                    } else {
+                        res.redirect("/ask/" + req.params.questionID + "#downvote" + req.params.answerID)
+                    }
+                });
+            }
         }
     });
 });

@@ -4,7 +4,7 @@
 <body>
      <% include partials/navbar.ejs %>
     <div id="search-container">
-        <form action="/nearby" method="POST">
+        <form action="/nearby/search" method="GET">
             Search:
             <input type="text" class="form-control" name="searchString">
              by 
@@ -26,7 +26,7 @@
                 <% } else { %>
                 <% var totalRating = 0; %>
                 <% business.rating.forEach(function(rating) { %>
-                <% totalRating += parseInt(rating); %>
+                <% totalRating += parseInt(rating.ratingVal); %>
                 <% }); %>
                 <%for(var i = 0; i < (totalRating / business.rating.length) - ((totalRating / business.rating.length) % 1); i++) {  %>
                 <i class="fa fa-star" aria-hidden="true"></i>
